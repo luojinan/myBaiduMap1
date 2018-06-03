@@ -141,82 +141,83 @@ var vm = new Vue({
 		map.addEventListener("rightclick",function(e){
 			//使用百度地图内置api的事件对象的方法，判断点击的是覆盖物还是地图
 			if(e.overlay){
-				alert('右键点击的是覆盖物，此次点击不会创建坐标数据');
+				console.log('右键点击的是覆盖物，此次点击不会创建坐标数据');
+				/***********************************************************/
+				/*覆盖物右键菜单*/
+				/*(给用户添加的覆盖物添加右键菜单失败，使用到异步？生命周期？)*/
+				/*给后台定义的覆盖物添加点击事件，修改data中show值也会undefined，使用到生命周期？*/
+				/*为什么csn那篇东西里会不使用到其他的生命周期....辣鸡*/
+				/***********************************************************/
+/*
+				//右键添加、移除、编辑点覆盖物
+				//创建右键菜单
+				var markerMenu = new BMap.ContextMenu();
+				//设置菜单(1、设置点击选中菜单某项时执行的方法 2、添加进右键菜单栏)
+				var removeMarker = function(e,ee,marker1){
+					map.removeOverlay(marker1);		//删除覆盖物函数
+				};
+				var addMyMarker = function(){
+					console.log(vm.test);
+					alert('测试一下');
+				};
+				
+				var writeNewInfo = function(){
+					alert(vm.msg);
+					//创建信息窗口
+					var writeSomething=
+					"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>添加新内容</h4>" + 
+					"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>快！写tm的</p>" +
+					"<input type='text'/>";
+					//初始化信息窗口
+					var writeInfoWindow = new BMap.InfoWindow(writeSomething);
+					//给覆盖物添加信息窗口事件
+					marker1.openInfoWindow(writeInfoWindow);
+				};
+				markerMenu.addItem(new BMap.MenuItem('删除',removeMarker.bind(marker1)) );
+				markerMenu.addItem(new BMap.MenuItem('添加',addMyMarker) );		
+				markerMenu.addItem(new BMap.MenuItem('编辑',writeNewInfo) );	
+				//markerMenu.addItem(new BMap.MenuItem('测试',vm.test) );	
+*/
+				//右键菜单添加到覆盖物上
+				/*for(let i = 0 ; i < vm.markers.length ; i++){
+					vm.markers[i].addContextMenu(markerMenu);
+					console.log(markers[i]);
+				};*/
+				/*marker1.addContextMenu(markerMenu);*/
 			}else{
-				this.addContextMenu(mapMenu);		//右键事件监听器，添加右键
-				//alert(e.point.lng + "," + e.point.lat);
-				vm.coordinates.push({						//获取右键点击的坐标
-					lng : e.point.lng,
-					lat : e.point.lat,
+						this.addContextMenu(mapMenu);		//右键事件监听器，添加右键
+						//alert(e.point.lng + "," + e.point.lat);
+						vm.coordinates.push({						//获取右键点击的坐标
+							lng : e.point.lng,
+							lat : e.point.lat,
+						});
+						vm.markers.push(new BMap.Marker(new BMap.Point(e.point.lng,e.point.lat)));
+					}
 				});
-				vm.markers.push(new BMap.Marker(new BMap.Point(e.point.lng,e.point.lat)));
-			}
-		});
 
 
 
-		/*
-		 *把数据数组化
-		 *	1、点坐标points
-		 *	2、覆盖物markers
-		 *循环遍历，实现多个数值和操作
-		 *	for来添加事件监听器
-		 *信息窗口对象数组化
-		 *	1、参数（坐标、内容--标题 正文 图片）
-		 *右键编辑
-		 *	1、显示input输入框
-		 *	2、上传信息到对象数组push
-		 *
-		 *watch监控marker数组数据的变化，实现即时添加方法。
-		 *	1、右键菜单（删除、编辑、信息窗口）
-		 *	2、单击，路线搜寻
-		 *
-		 *以上完成
-		 *编辑数据库，并接上
-		*/
+				/*
+				 *把数据数组化
+				 *	1、点坐标points
+				 *	2、覆盖物markers
+				 *循环遍历，实现多个数值和操作
+				 *	for来添加事件监听器
+				 *信息窗口对象数组化
+				 *	1、参数（坐标、内容--标题 正文 图片）
+				 *右键编辑
+				 *	1、显示input输入框
+				 *	2、上传信息到对象数组push
+				 *
+				 *watch监控marker数组数据的变化，实现即时添加方法。
+				 *	1、右键菜单（删除、编辑、信息窗口）
+				 *	2、单击，路线搜寻
+				 *
+				 *以上完成
+				 *编辑数据库，并接上
+				*/
 
-/***********************************************************/
-		/*覆盖物右键菜单*/
-		/*(给用户添加的覆盖物添加右键菜单失败，使用到异步？生命周期？)*/
-		/*给后台定义的覆盖物添加点击事件，修改data中show值也会undefined，使用到生命周期？*/
-		/*为什么csn那篇东西里会不使用到其他的生命周期....辣鸡*/
-/***********************************************************/
 
-		//右键添加、移除、编辑点覆盖物
-		//创建右键菜单
-		var markerMenu = new BMap.ContextMenu();
-		//设置菜单(1、设置点击选中菜单某项时执行的方法 2、添加进右键菜单栏)
-		var removeMarker = function(e,ee,marker1){
-			map.removeOverlay(marker1);		//删除覆盖物函数
-		};
-		var addMyMarker = function(){
-			console.log(vm.test);
-			alert('测试一下');
-		};
-		
-		var writeNewInfo = function(){
-			alert(vm.msg);
-			//创建信息窗口
-			var writeSomething=
-			"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>添加新内容</h4>" + 
-			"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>快！写tm的</p>" +
-			"<input type='text'/>";
-			//初始化信息窗口
-			var writeInfoWindow = new BMap.InfoWindow(writeSomething);
-			//给覆盖物添加信息窗口事件
-			marker1.openInfoWindow(writeInfoWindow);
-		};
-		markerMenu.addItem(new BMap.MenuItem('删除',removeMarker.bind(marker1)) );
-		markerMenu.addItem(new BMap.MenuItem('添加',addMyMarker) );		
-		markerMenu.addItem(new BMap.MenuItem('编辑',writeNewInfo) );	
-		//markerMenu.addItem(new BMap.MenuItem('测试',vm.test) );	
-
-		//右键菜单添加到覆盖物上
-		/*for(let i = 0 ; i < vm.markers.length ; i++){
-			vm.markers[i].addContextMenu(markerMenu);
-			console.log(markers[i]);
-		};*/
-		marker1.addContextMenu(markerMenu);
 
 	},
 	data:{
@@ -231,40 +232,33 @@ var vm = new Vue({
 	watch:{
 		markers:{
 			handler(){
-				console.log('监控器生效'+'第'+[this.markers.length-1]+'次');
+				console.log('监控器生效'+'第'+[this.markers.length]+'次');
 				console.log(this.markers);
+				/***********************************************************/
 				//给点添加右键菜单
 					//鼠标覆盖添加打开信息窗口
 				var inputSomething=
-				"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>添加新内容</h4>" + 
-				"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>快！写tm的</p>" +
-				"<input type='text'/>";
+				"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>显示你输入的标题</h4>" + 
+				"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>当然是显示你输入的内容啊</p>" 
 				var inputInfoWindow = new BMap.InfoWindow(inputSomething);
 				this.markers[this.markers.length-1].addEventListener("mouseover",function(){
-				this.openInfoWindow(inputInfoWindow);
+					this.openInfoWindow(inputInfoWindow);
 				});
+				/***********************************************************/
 				//右键添加菜单
 				//创建右键菜单
 				var inputMenu = new BMap.ContextMenu();
 				//设置右键菜单方法和内容
-				var inputNewInfo = function(){
-
+				var inputNewInfo = function(e,ee,marker){
 					//创建信息窗口
 					var inputSomething2=
-					"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>右键添加新内容</h4>" + 
-					"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>快！写tm的</p>" +
+					"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>右键，添加新内容</h4>" + 
+					"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>快！鼠标点击了右键，写tm的</p>" +
 					"<input type='text'/>";
 					//初始化信息窗口
 					var rinputInfoWindow = new BMap.InfoWindow(inputSomething2);
 					//给覆盖物添加信息窗口事件
-					
-					//因为地图右键添加覆盖物时的一个点，再在覆盖物上点了右键，那个-1就是低温次右键没有覆盖物的点
-					//导致无法打开窗口。因为没有覆盖物
-					//右键这个弊端  必须清除
-
-					//因为全图有一个右键事件，而覆盖物也有一个右键事件，当点击覆盖物时，同时触发全图右键事件导致数据
-
-					vm.markers[vm.markers.length-2].openInfoWindow(rinputInfoWindow);
+					marker.openInfoWindow(rinputInfoWindow);
 
 				};
 				//console.log(inputNewInfo);
