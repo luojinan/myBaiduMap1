@@ -103,7 +103,9 @@ var vm = new Vue({
 		marker1.addEventListener("click",function(){
 			searchInfoWindow.open(marker1);
 		});
-
+/***********************************************************/
+		/*鼠标事件*/
+/***********************************************************/
 
 
 /***********************************************************/
@@ -226,24 +228,67 @@ var vm = new Vue({
 		coordinates:[],
 		markers:[],
 		in_show:false,
+		markerMsg:[
+			{title:'默认标题',content:'这是默认内容',lngMsg:'这是默认x坐标',latMsg:'这是默认y坐标',},
+		],
+		remenber:'',	//用于存放右键点击覆盖物添加信息时，存下点击覆盖物的坐标信息
+		remenberIndex:0,
+
+	},
+	computed:{
+
+		inputSomething(){
+			return  "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>"+
+					this.markerMsg[this.remenberIndex].title+"</h4>" + 
+					"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>"+
+					this.markerMsg[this.remenberIndex].content+
+					"</p>" ;
+		},
+	},
+	methods:{
+		//按钮提交事件
+		commitMsg(){
+			var intTitle = document.getElementById('intTitle');
+			var intContent = document.getElementById('intContent');
+
+			//获取输入狂中的内容push给相应的数据库中
+			vm.markerMsg.push({
+				title:intTitle.value,
+				content:intContent.value,
+				lngMsg:vm.remenber.point.lng,
+				latMsg:vm.remenber.point.lat,
+			});
+			vm.remenber='';	//清空掉这个暂存坐标信息
+		},
 	},
 	//在mouned生命周期里，无法像data那样直接使用vm.function，而控制台看vm这个对象时能看到function是直接挂载在了vm对象上的
 	//直接赋值也会undefined，但是在function里却能console出来，简直神奇，也就是能看不能用？？？用return也不能跑这里的function
 	watch:{
 		markers:{
 			handler(){
-				console.log('监控器生效'+'第'+[this.markers.length]+'次');
-				console.log(this.markers);
+				console.log(this.markers);				
 				/***********************************************************/
-				//给点添加右键菜单
-					//鼠标覆盖添加打开信息窗口
-				var inputSomething=
-				"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>显示你输入的标题</h4>" + 
-				"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>当然是显示你输入的内容啊</p>" 
-				var inputInfoWindow = new BMap.InfoWindow(inputSomething);
+				//鼠标事件，覆盖添加打开信息窗口
+				//因为在watch监控器里，所以当数据没有发生变化的时候，内容无法刷新
+				var mouseoverEseay = this.markers[this.markers.length-1].getPosition();
+				var inputSomething1=
+					"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>当前坐标是"+
+					mouseoverEseay.lng+
+					"，"+
+					mouseoverEseay.lat+
+					"</h4>";
+				var inputInfoWindow = new BMap.InfoWindow(inputSomething1);
+				//鼠标覆盖打开信息窗口，先判断是否打开了右键输入窗口
+				//获取当前覆盖物坐标进行判断
 				this.markers[this.markers.length-1].addEventListener("mouseover",function(){
 					this.openInfoWindow(inputInfoWindow);
 				});
+				//给点添加鼠标事件
+				this.markers[this.markers.length-1].addEventListener("mouseout",function(){
+					this.closeInfoWindow(inputInfoWindow);
+					//vm.markers.my='';
+					//vm.remenberIndex = 0;
+				});	
 				/***********************************************************/
 				//右键添加菜单
 				//创建右键菜单
@@ -254,18 +299,56 @@ var vm = new Vue({
 					var inputSomething2=
 					"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>右键，添加新内容</h4>" + 
 					"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>快！鼠标点击了右键，写tm的</p>" +
-					"<input type='text'/>";
+					"输入标题：<input type='text' id='intTitle'/>"+
+					"</br>"+
+					"输入内容：<input type='text' id='intContent'/>"+
+					"</br>"+
+					"<button onclick='vm.commitMsg()'>添加</button>";
+					//把当前覆盖物的坐标存起来
+					vm.remenber = marker;
+
 					//初始化信息窗口
 					var rinputInfoWindow = new BMap.InfoWindow(inputSomething2);
 					//给覆盖物添加信息窗口事件
 					marker.openInfoWindow(rinputInfoWindow);
 
+
 				};
-				//console.log(inputNewInfo);
+				//使用if判断当前覆盖物是否有数据，有就菜单有编辑删除等功能
 				inputMenu.addItem(new BMap.MenuItem('监控添加',inputNewInfo) );
 				this.markers[this.markers.length-1].addContextMenu(inputMenu);
 							
-			},
+			},	
 		},
+		markerMsg:{
+			handler(){
+				/***********************************************************/
+				//鼠标事件，覆盖添加打开信息窗口
+				//因为在watch监控器里，所以当数据没有发生变化的时候，内容无法刷新
+				var inputInfoWindow = new BMap.InfoWindow(vm.inputSomething);
+				console.log(vm.inputSomething);
+				//鼠标覆盖打开信息窗口，先判断是否打开了右键输入窗口
+				//获取当前覆盖物坐标进行判断
+				this.markers[this.markers.length-1].addEventListener("mouseover",function(){
+					//vm.markers.my='1';
+					
+					//获取覆盖物坐标，不能用鼠标事件对象的e，这个事件对象不是覆盖物的
+					var mouseoverMsg = this.getPosition();
+					var thisMouseOver = vm.markerMsg.findIndex(function(item,index){
+						return item.lngMsg==mouseoverMsg.lng;
+					});
+					vm.remenberIndex = thisMouseOver;
+					this.openInfoWindow(inputInfoWindow);
+				});
+				//给点添加鼠标事件
+				this.markers[this.markers.length-1].addEventListener("mouseout",function(){
+					this.closeInfoWindow(inputInfoWindow);
+					//vm.markers.my='';
+					//vm.remenberIndex = 0;
+				});	
+			},
+			deep:true
+		},
+
 	},
 })
