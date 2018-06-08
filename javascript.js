@@ -229,7 +229,7 @@ var vm = new Vue({
 		markers:[],
 		in_show:false,
 		markerMsg:[
-			{title:'默认标题',content:'这是默认内容',lngMsg:'这是默认x坐标',latMsg:'这是默认y坐标',},
+			
 		],
 		remenber:'',	//用于存放右键点击覆盖物添加信息时，存下点击覆盖物的坐标信息
 		remenberIndex:0,
@@ -237,13 +237,7 @@ var vm = new Vue({
 	},
 	computed:{
 
-		inputSomething(){
-			return  "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>"+
-					this.markerMsg[this.remenberIndex].title+"</h4>" + 
-					"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>"+
-					this.markerMsg[this.remenberIndex].content+
-					"</p>" ;
-		},
+
 	},
 	methods:{
 		//按钮提交事件
@@ -325,23 +319,33 @@ var vm = new Vue({
 				/***********************************************************/
 				//鼠标事件，覆盖添加打开信息窗口
 				//因为在watch监控器里，所以当数据没有发生变化的时候，内容无法刷新
-				var inputInfoWindow = new BMap.InfoWindow(vm.inputSomething);
-				console.log(vm.inputSomething);
+				//console.log(vm.inputSomething);
+					var inputSomething = "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>"+
+								vm.markerMsg[vm.remenberIndex].title+"</h4>" + 
+								"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>"+
+								vm.markerMsg[vm.remenberIndex].content+
+								"</p>" ;
+				var inputInfoWindow = new BMap.InfoWindow(inputSomething);
+				
 				//鼠标覆盖打开信息窗口，先判断是否打开了右键输入窗口
 				//获取当前覆盖物坐标进行判断
-				this.markers[this.markers.length-1].addEventListener("mouseover",function(){
+				this.markers[this.markerMsg.length-1].addEventListener("mouseover",function(){
 					//vm.markers.my='1';
 					
 					//获取覆盖物坐标，不能用鼠标事件对象的e，这个事件对象不是覆盖物的
 					var mouseoverMsg = this.getPosition();
-					var thisMouseOver = vm.markerMsg.findIndex(function(item,index){
-						return item.lngMsg==mouseoverMsg.lng;
+					var thisMouseOver = vm.markers.findIndex(function(item,index){
+						return item.point.lng==mouseoverMsg.lng;
 					});
-					vm.remenberIndex = thisMouseOver;
+
+					vm.remenberIndex = thisMouseOver+1;
+					console.log(thisMouseOver);
+					console.log(inputSomething);
 					this.openInfoWindow(inputInfoWindow);
 				});
+
 				//给点添加鼠标事件
-				this.markers[this.markers.length-1].addEventListener("mouseout",function(){
+				this.markers[0].addEventListener("mouseout",function(){
 					this.closeInfoWindow(inputInfoWindow);
 					//vm.markers.my='';
 					//vm.remenberIndex = 0;
